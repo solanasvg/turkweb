@@ -1,0 +1,1123 @@
+<html><head><base href="."><meta charset="utf-8">
+<title>Webturkey ONESHOT</title>
+<style>
+@font-face {
+  font-family: 'VCR OSD Mono';
+  src: url('/VCR_OSD_MONO_1.001.ttf') format('truetype');
+}
+
+body {
+  margin: 0;
+  background: #111;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  color: white;
+  font-family: 'VCR OSD Mono', monospace; /* Changed from Arial */
+}
+
+#game-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('https://file.garden/Zx3u9a1Z7kthgAAO/background.gif');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -1;
+  opacity: 0.7;
+}
+
+#loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: black;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+#loading-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  margin-bottom: 0;
+}
+
+#loading-bar-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 20px;
+  background: #333;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+#game-container {
+  width: 400px;
+  height: 600px;
+  position: relative;
+  border: 2px solid #333;
+  overflow: hidden;
+}
+
+.arrow-lane {
+  position: absolute;
+  width: 80px;
+  height: 100%;
+  border-left: 1px solid #333;
+  border-right: 1px solid #333;
+}
+
+.target-arrow {
+  position: absolute;
+  bottom: 50px;
+  width: 60px;
+  height: 60px;
+  opacity: 0.5;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.target-arrow.lane-0 {
+  background-image: url('https://file.garden/Zx3u9a1Z7kthgAAO/purple0000.png');
+}
+
+.target-arrow.lane-1 {
+  background-image: url('https://file.garden/Zx3u9a1Z7kthgAAO/blue0000.png');
+}
+
+.target-arrow.lane-2 {
+  background-image: url('https://file.garden/Zx3u9a1Z7kthgAAO/green0000.png');
+}
+
+.target-arrow.lane-3 {
+  background-image: url('https://file.garden/Zx3u9a1Z7kthgAAO/red0000.png');
+}
+
+.target-zone {
+  position: absolute;
+  bottom: 30px;
+  width: 100px;
+  height: 100px;
+  border: 2px solid #666;
+  border-radius: 10px;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.perfect-window {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border: 2px solid #00ff00;
+  border-radius: 10px;
+  opacity: 0.2;
+  bottom: 130px;
+}
+
+.good-window {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border: 2px solid #ffff00;
+  border-radius: 10px;
+  opacity: 0.2;
+  bottom: 30px;
+}
+
+.miss-window {
+  display: none;
+}
+
+.falling-arrow {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  transition: opacity 0.2s;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.falling-arrow.lane-0 {
+  background-image: url('https://file.garden/Zx3u9a1Z7kthgAAO/purple0000.png');
+}
+
+.falling-arrow.lane-1 {
+  background-image: url('https://file.garden/Zx3u9a1Z7kthgAAO/blue0000.png');
+}
+
+.falling-arrow.lane-2 {
+  background-image: url('https://file.garden/Zx3u9a1Z7kthgAAO/green0000.png');
+}
+
+.falling-arrow.lane-3 {
+  background-image: url('https://file.garden/Zx3u9a1Z7kthgAAO/red0000.png');
+}
+
+#score {
+  font-size: 28px; /* Updated font size */
+  margin: 20px;
+}
+
+#combo {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  font-size: 24px; /* Updated font size */
+}
+
+.feedback {
+  position: absolute;
+  bottom: 150px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.2s;
+  width: 200px;
+  height: 100px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.perfect { 
+  background-image: url('https://file.garden/Zx3u9a1Z7kthgAAO/sick.png');
+}
+.good { 
+  background-image: url('https://file.garden/Zx3u9a1Z7kthgAAO/good.png');
+}
+.miss { 
+  display: none;  
+}
+
+#leaderboard-container {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+#leaderboard {
+  width: 100%;
+  height: 100%;
+  background-image: url('https://file.garden/Zx3u9a1Z7kthgAAO/leaderboard.png');
+  background-size: cover;
+  background-position: center;
+  padding: 0;
+  position: relative;
+}
+
+.leaderboard-scores {
+  position: absolute;
+  top: 200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  color: white;
+  font-size: 24px; /* Updated font size */
+  font-family: 'VCR OSD Mono', monospace; /* Added font-family */
+}
+
+.score-entry {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.score-entry img {
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
+  margin-right: 15px;
+}
+
+.score-entry .user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.score-entry .username {
+  font-weight: bold;
+  color: #fff;
+  font-size: 22px; /* Updated font size */
+}
+
+.score-entry .score {
+  color: #ddd;
+  font-size: 20px; /* Updated font size */
+}
+
+#characters {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+#opponent {
+  width: 400px;  
+  height: auto;
+  position: absolute;
+  left: 20%;
+  bottom: 20%;
+}
+
+#player {
+  width: 300px;
+  height: auto;
+  position: absolute;
+  right: 20%;
+  bottom: 20%;
+}
+
+#options-menu {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.9);
+  padding: 20px;
+  border-radius: 10px;
+  color: white;
+  display: none;
+  z-index: 1001;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.option-label {
+  font-size: 22px; /* Updated font size */
+  font-family: 'VCR OSD Mono', monospace; /* Added font-family */
+}
+
+.option-button {
+  padding: 10px 20px;
+  background: #333;
+  border: 1px solid #666;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'VCR OSD Mono', monospace; /* Added font-family */
+  font-size: 18px; /* Updated font size */
+}
+
+.option-button:hover {
+  background: #444;
+}
+
+.option-button.active {
+  background: #666;
+}
+
+#start-options {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.start-button {
+  padding: 10px 20px;
+  background: #0a0;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'VCR OSD Mono', monospace; /* Added font-family */
+  font-size: 18px; /* Updated font size */
+}
+
+.settings-button {
+  padding: 5px 15px;
+  background: #333;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'VCR OSD Mono', monospace; /* Added font-family */
+  font-size: 18px; /* Updated font size */
+}
+
+#botplay-warning {
+  color: #ff0000;
+  text-align: center;
+  margin: 20px;
+  display: none; /* Initially hidden */
+  font-family: 'VCR OSD Mono', monospace; /* Added font-family */
+}
+
+#thumbnail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2000; /* Higher than loading screen */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: black;
+}
+
+#thumbnail img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+#bottom-right-image {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 150px; /* Adjust size as needed */
+  height: auto;
+  pointer-events: none; /* So it doesn't interfere with gameplay */
+  z-index: 100; /* Above game elements but below menus */
+}
+
+/* Add new credits menu styles */
+#credits-menu {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.9);
+  padding: 20px;
+  border-radius: 10px;
+  color: white;
+  display: none;
+  z-index: 1001;
+  width: 500px;
+}
+
+.credits-entry {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 10px;
+}
+
+.credits-entry img {
+  width: 64px;
+  height: 64px;
+  margin-right: 20px;
+}
+
+.credits-text {
+  font-size: 20px; /* Updated font size */
+  font-family: 'VCR OSD Mono', monospace; /* Added font-family */
+}
+
+.websim-credit {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.websim-credit img {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 10px;
+}
+
+.close-credits {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: #0a0;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+<div id="thumbnail">
+  <img src="https://file.garden/Zx3u9a1Z7kthgAAO/thumbnail.png" alt="Thumbnail">
+</div>
+
+<div id="game-background"></div>
+
+<div id="loading-screen">
+  <img id="loading-image" src="https://file.garden/Zx3u9a1Z7kthgAAO/funkay.png" alt="Loading...">
+  <div id="loading-bar-container">
+    <div id="loading-bar"></div>
+  </div>
+</div>
+
+<h1>FNF: VS Webturkey ONESHOT</h1>
+<div id="score">Score: 0</div>
+<div id="start-options">
+  <button class="start-button" onclick="startGame()">Start Game</button>
+  <button class="settings-button" onclick="showOptions()">Settings</button>
+  <button class="settings-button" onclick="showCredits()">Credits</button>
+</div>
+<div id="game-container">
+  <div id="combo">Combo: 0</div>
+  <div class="feedback"></div>
+  <div id="botplay-warning">Warning: Botplay is enabled. Proceed with caution!</div>
+</div>
+
+<div id="options-menu">
+  <h2>Game Options</h2>
+  <div class="options-grid">
+    <div>
+      <div class="option-label">Scroll Direction</div>
+      <button class="option-button active" onclick="setScrollDirection('down')">Downscroll</button>
+      <button class="option-button" onclick="setScrollDirection('up')">Upscroll</button>
+    </div>
+    <div>
+      <div class="option-label">Controls</div>
+      <button class="option-button active" onclick="setControls('arrows')">Arrow Keys</button>
+      <button class="option-button" onclick="setControls('wasd')">WASD</button>
+      <button class="option-button" onclick="setControls('dfjk')">DFJK</button>
+    </div>
+    <div>
+      <div class="option-label">Note Fade</div>
+      <button class="option-button" onclick="setNoteFade(true)">Enabled</button>
+      <button class="option-button active" onclick="setNoteFade(false)">Disabled</button>
+    </div>
+    <div>
+      <div class="option-label">Hit Sounds</div>
+      <button class="option-button active" onclick="setHitSounds(true)">Enabled</button>
+      <button class="option-button" onclick="setHitSounds(false)">Disabled</button>
+    </div>
+  </div>
+  <button class="start-button" onclick="closeOptions()">Save & Close</button>
+</div>
+
+<div id="credits-menu">
+  <h2>Credits</h2>
+  <div class="credits-entry">
+    <img src="https://file.garden/Zx3u9a1Z7kthgAAO/leblock.png" alt="leblock">
+    <div class="credits-text">leblock69 - Animator, Sprite Artist, Composer</div>
+  </div>
+  <div class="credits-entry">
+    <img src="https://file.garden/Zx3u9a1Z7kthgAAO/icon64.png" alt="Funkin Crew">
+    <div class="credits-text">The Funkin' Crew - Animator, Sprite Artist</div>
+  </div>
+  <div class="websim-credit">
+    <img src="https://file.garden/Zx3u9a1Z7kthgAAO/websimicon.png" alt="WebSim">
+    <div class="credits-text">The WebSim Crew - literally everything</div>
+    <div class="credits-text">hi kat!!! :D</div>
+  </div>
+  <button class="close-credits" onclick="closeCredits()">Close</button>
+</div>
+
+<div id="characters">
+  <img id="opponent" src="https://file.garden/Zx3u9a1Z7kthgAAO/turkeyidle.gif" alt="Opponent">
+  <img id="player" src="https://file.garden/Zx3u9a1Z7kthgAAO/bfidle.gif" alt="Player">
+</div>
+
+<div id="leaderboard-container">
+  <div id="leaderboard">
+    <div class="leaderboard-scores"></div>
+  </div>
+</div>
+
+<img id="bottom-right-image" src="https://file.garden/Zx3u9a1Z7kthgAAO/soggycat.webp" alt="Soggy Cat">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script>
+const controlSchemes = {
+  arrows: ['ArrowLeft', 'ArrowDown', 'ArrowUp', 'ArrowRight'],
+  wasd: ['A', 'S', 'W', 'D'],
+  dfjk: ['D', 'F', 'J', 'K']
+};
+
+let keys = controlSchemes.arrows; // Default to arrow keys
+
+let currentUser = null;
+let scrollDirection = 'down';
+let controlScheme = 'arrows';
+let activeArrows = [];
+let hitSoundBuffer;
+let fadeNotes = false;  // Changed from true to false
+let hitSoundsEnabled = true; // Default setting
+
+window.addEventListener('load', () => {
+  const thumbnail = document.getElementById('thumbnail');
+  setTimeout(() => {
+    thumbnail.style.display = 'none';
+  }, 100); // 0.1 seconds
+});
+
+async function getCurrentUser() {
+  try {
+    const user = await window.websim.getCreatedBy();
+    if (user) {
+      return {
+        username: user.username,
+        profilePic: `https://images.websim.ai/avatar/${user.username}`
+      };
+    }
+  } catch (err) {
+    console.error('Error getting user:', err);
+  }
+  return {
+    username: "Guest",
+    profilePic: "https://file.garden/Zx3u9a1Z7kthgAAO/default-avatar.png"
+  };
+}
+
+const loadingScreen = document.getElementById('loading-screen');
+const loadingBar = document.getElementById('loading-bar');
+let audioContext;
+let songBuffer;
+let songSource;
+let assetsLoaded = 0;
+const totalAssets = 10; // Adjusted to 10
+let highScores = new Map(); // Use Map to store unique player scores
+
+function updateLoadingProgress() {
+  assetsLoaded++;
+  const progress = (assetsLoaded / totalAssets) * 100;
+  loadingBar.style.width = `${progress}%`;
+  
+  if (assetsLoaded === totalAssets) {
+    setTimeout(() => {
+      loadingScreen.style.display = 'none';
+    }, 500);
+  }
+}
+
+function preloadImage(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      updateLoadingProgress();
+      resolve();
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
+async function loadAudio(url) {
+  try {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    songBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    
+    // Load hit sound
+    const hitSoundResponse = await fetch('https://file.garden/Zx3u9a1Z7kthgAAO/hitsound.ogg');
+    const hitSoundArrayBuffer = await hitSoundResponse.arrayBuffer();
+    hitSoundBuffer = await audioContext.decodeAudioData(hitSoundArrayBuffer);
+    
+    updateLoadingProgress();
+  } catch (error) {
+    console.error('Error loading audio:', error);
+  }
+}
+
+async function loadAssets() {
+  const imageUrls = [
+    'https://file.garden/Zx3u9a1Z7kthgAAO/soggycat.webp',
+    'https://file.garden/Zx3u9a1Z7kthgAAO/funkay.png',
+    'https://file.garden/Zx3u9a1Z7kthgAAO/sick.png',
+    'https://file.garden/Zx3u9a1Z7kthgAAO/good.png',
+    'https://file.garden/Zx3u9a1Z7kthgAAO/shit.png',
+    'https://file.garden/Zx3u9a1Z7kthgAAO/purple0000.png',
+    'https://file.garden/Zx3u9a1Z7kthgAAO/blue0000.png',
+    'https://file.garden/Zx3u9a1Z7kthgAAO/green0000.png',
+    'https://file.garden/Zx3u9a1Z7kthgAAO/red0000.png',
+    'https://file.garden/Zx3u9a1Z7kthgAAO/turkeyidle.gif',
+    'https://file.garden/Zx3u9a1Z7kthgAAO/bfidle.gif',
+    'https://file.garden/Zx3u9a1Z7kthgAAO/background.gif',
+    'https://file.garden/Zx3u9a1Z7kthgAAO/bfleft.gif',
+    'https://file.garden/Zx3u9a1Z7kthgAAO/bfdown.gif', 
+    'https://file.garden/Zx3u9a1Z7kthgAAO/bfup.gif',
+    'https://file.garden/Zx3u9a1Z7kthgAAO/bfright.gif'
+  ];
+
+  await Promise.all([
+    ...imageUrls.map(url => preloadImage(url)),
+    loadAudio('https://file.garden/Zx3u9a1Z7kthgAAO/turksters.mp3')
+  ]);
+}
+
+loadAssets();
+
+const gameContainer = document.getElementById('game-container');
+const scoreElement = document.getElementById('score');
+const comboElement = document.getElementById('combo');
+const feedbackElement = document.querySelector('.feedback');
+const startPrompt = document.getElementById('start-options');
+
+let score = 0;
+let combo = 0;
+let songData = null;
+let startTime = null;
+let scheduledNotes = [];
+let gameStarted = false;
+const lanes = 4;
+const laneWidth = gameContainer.clientWidth / lanes;
+
+const defaultChart = {"song":{"song":"turksters","bpm":160,"needsVoices":true,"player1":"bf","player2":"dad","speed":2.8,"notes":[{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[]},{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[3000,0,187.5],[3187.5,1,187.5],[3375,0,187.5],[3562.5,2,187.5],[3750,0,0],[3937.5,2,0],[4125,1,0],[4312.5,3,0]]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[4500,0,0],[4687.5,3,0],[4781.25,3,0],[4875,2,187.5],[5062.5,3,0],[5250,0,187.5],[5437.5,0,187.5],[5625,3,0],[5718.75,2,0],[5812.5,0,0],[5906.25,1,0]]},{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[]},{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[9000,0,187.5],[9187.5,1,187.5],[9375,0,187.5],[9562.5,2,187.5],[9750,0,0],[9937.5,2,0],[10125,1,0],[10312.5,3,0]]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[10500,0,0],[10687.5,3,0],[10781.25,3,0],[10875,2,187.5],[11062.5,3,0],[11250,0,187.5],[11437.5,0,187.5],[11625,3,0],[11718.75,2,0],[11812.5,0,0],[11906.25,1,0]]},{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[]},{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[15000,0,187.5],[15187.5,1,187.5],[15375,3,187.5],[15562.5,2,187.5],[15750,3,187.5],[15937.5,1,187.5],[16125,0,187.5],[16312.5,2,187.5]]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[16500,3,187.5],[16687.5,2,187.5],[16875,1,187.5],[17062.5,0,187.5],[17250,3,0],[17343.75,0,0],[17437.5,2,0],[17531.25,3,0],[17625,0,0],[17718.75,3,0],[17812.5,1,0],[17906.25,3,0]]},{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[]},{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[21000,0,187.5],[21187.5,1,187.5],[21375,3,187.5],[21562.5,2,187.5],[21750,3,187.5],[21937.5,1,187.5],[22125,0,187.5],[22312.5,2,187.5]]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[22500,3,187.5],[22687.5,2,187.5],[22875,1,187.5],[23062.5,0,187.5],[23250,3,0],[23343.75,0,0],[23437.5,2,0],[23531.25,3,0],[23625,0,0],[23718.75,3,0],[23812.5,1,0],[23906.25,3,0]]},{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[]},{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[]},{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[]},{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[30000,3,1125],[31125,0,375]]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[31500,3,1125],[32625,0,187.5],[32625,2,375]]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[33000,3,1125],[34125,1,375]]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[34500,2,281.25],[34500,3,750],[35250,0,750],[35250,2,375],[35625,1,375]]},{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[[36000,3,1500]]},{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[[37500,0,1500]]},{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[[39000,2,1500]]},{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[[40500,1,1500]]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[42000,3,187.5],[42187.5,0,187.5],[42375,3,0],[42468.75,3,0],[42562.5,0,187.5],[42750,2,93.75],[42843.75,3,0],[42937.5,2,0],[43031.25,0,0],[43125,3,187.5],[43312.5,1,187.5]]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[43500,3,0],[43593.75,0,0],[43687.5,3,0],[43781.25,2,0],[43875,3,0],[43968.75,0,0],[44062.5,3,0],[44156.25,2,0],[44250,3,0],[44343.75,1,0],[44437.5,0,0],[44531.25,1,0],[44625,3,0],[44718.75,1,0],[44812.5,0,0],[44906.25,1,0]]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[45000,2,750],[45000,3,750],[45750,1,750],[45750,0,750]]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[46500,0,750],[46500,3,750],[47250,2,750],[47250,1,750]]},{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[]},{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[]},{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[]},{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[54000,3,0],[54281.25,3,0],[54562.5,3,0],[54843.75,3,0],[55125,2,187.5],[55312.5,0,187.5]]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[55500,1,0],[55781.25,1,0],[56062.5,1,0],[56343.75,1,0],[56625,0,187.5],[56812.5,3,187.5]]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[57000,3,187.5],[57187.5,1,0],[57281.25,3,187.5],[57468.75,1,0],[57562.5,3,187.5],[57750,1,0],[57843.75,3,187.5],[58031.25,1,0],[58125,2,0],[58218.75,3,0],[58312.5,0,0],[58406.25,3,0]]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[58500,0,0],[58593.75,3,0],[58687.5,1,0],[58781.25,3,0],[58875,0,0],[58968.75,2,0],[59062.5,3,0],[59156.25,2,0],[59250,3,187.5],[59437.5,0,187.5],[59625,2,187.5],[59812.5,1,187.5]]},{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[]},{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[63000,0,187.5],[63187.5,1,187.5],[63375,0,187.5],[63562.5,2,187.5],[63750,0,0],[63937.5,2,0],[64125,1,0],[64312.5,3,0]]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[64500,0,0],[64687.5,3,0],[64781.25,3,0],[64875,2,187.5],[65062.5,3,0],[65250,0,187.5],[65437.5,0,187.5],[65625,3,0],[65718.75,2,0],[65812.5,0,0],[65906.25,1,0]]},{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[]},{"lengthInSteps":16,"mustHitSection":false,"sectionNotes":[]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[69000,0,187.5],[69187.5,1,187.5],[69375,3,187.5],[69562.5,2,187.5],[69750,3,187.5],[69937.5,1,187.5],[70125,0,187.5],[70312.5,2,187.5]]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[70500,3,187.5],[70687.5,2,187.5],[70875,1,187.5],[71062.5,0,187.5],[71250,3,0],[71343.75,0,0],[71437.5,2,0],[71531.25,3,0],[71625,0,0],[71718.75,3,0],[71812.5,1,0],[71906.25,3,0]]},{"lengthInSteps":16,"mustHitSection":true,"sectionNotes":[[72000,3,1500]]}]},"generatedBy":"Psych Chart Converter"};
+
+function findSimultaneousNotes(currentArrow) {
+  const timeThreshold = 10; 
+  return activeArrows.filter(arrow => 
+    Math.abs(arrow.time - currentArrow.time) < timeThreshold
+  );
+}
+
+const scrollTime = 1400; 
+
+for (let i = 0; i < lanes; i++) {
+  const lane = document.createElement('div');
+  lane.className = 'arrow-lane';
+  lane.style.left = `${i * laneWidth}px`;
+  
+  const target = document.createElement('div');
+  target.className = `target-arrow lane-${i}`;
+  target.style.left = `${(laneWidth - 60) / 2}px`;
+  
+  const targetZone = document.createElement('div');
+  targetZone.className = 'target-zone';
+  targetZone.style.left = `${i * laneWidth + (laneWidth - 100) / 2}px`;
+  
+  lane.appendChild(target);
+  gameContainer.appendChild(lane);
+  gameContainer.appendChild(targetZone);
+
+  const perfectWindowEl = document.createElement('div');
+  perfectWindowEl.className = 'perfect-window';
+  perfectWindowEl.style.left = `${i * laneWidth + (laneWidth - 100) / 2}px`;
+  
+  const goodWindowEl = document.createElement('div');
+  goodWindowEl.className = 'good-window';
+  goodWindowEl.style.left = `${i * laneWidth + (laneWidth - 100) / 2}px`;
+  
+  const missWindowEl = document.createElement('div');
+  missWindowEl.className = 'miss-window';
+  missWindowEl.style.left = `${i * laneWidth + (laneWidth - 100) / 2}px`;
+  
+  gameContainer.appendChild(perfectWindowEl);
+  gameContainer.appendChild(goodWindowEl);
+  gameContainer.appendChild(missWindowEl);
+}
+
+function showOptions() {
+  document.getElementById('options-menu').style.display = 'block';
+}
+
+function closeOptions() {
+  document.getElementById('options-menu').style.display = 'none';
+}
+
+function showCredits() {
+  document.getElementById('credits-menu').style.display = 'block';
+}
+
+function closeCredits() {
+  document.getElementById('credits-menu').style.display = 'none';
+}
+
+function setScrollDirection(direction) {
+  scrollDirection = direction;
+  document.querySelectorAll('#options-menu .option-button').forEach(btn => {
+    btn.classList.remove('active');
+    if(btn.textContent.toLowerCase().includes(direction)) {
+      btn.classList.add('active');
+    }
+  });
+  
+  const arrows = document.querySelectorAll('.target-arrow');
+  const perfectWindows = document.querySelectorAll('.perfect-window');
+  const goodWindows = document.querySelectorAll('.good-window');
+  const missWindows = document.querySelectorAll('.miss-window');
+
+  if(direction === 'up') {
+    arrows.forEach(arrow => {
+      arrow.style.top = '50px';
+      arrow.style.bottom = 'auto';
+    });
+
+    perfectWindows.forEach(window => {
+      window.style.top = '130px';
+      window.style.bottom = 'auto';
+    });
+
+    goodWindows.forEach(window => {
+      window.style.top = '30px';
+      window.style.bottom = 'auto';
+    });
+
+    missWindows.forEach(window => {
+      window.style.top = '-70px';
+      window.style.bottom = 'auto';
+    });
+  } else {
+    arrows.forEach(arrow => {
+      arrow.style.bottom = '50px';
+      arrow.style.top = 'auto';
+    });
+
+    perfectWindows.forEach(window => {
+      window.style.bottom = '130px';
+      window.style.top = 'auto';
+    });
+
+    goodWindows.forEach(window => {
+      window.style.bottom = '30px';
+      window.style.top = 'auto';
+    });
+
+    missWindows.forEach(window => {
+      window.style.bottom = '-70px';
+      window.style.top = 'auto';
+    });
+  }
+}
+
+function setControls(scheme) {
+  controlScheme = scheme;
+  keys = controlSchemes[scheme];
+  document.querySelectorAll('#options-menu .option-button').forEach(btn => {
+    btn.classList.remove('active');
+    if(btn.textContent.toLowerCase().includes(scheme)) {
+      btn.classList.add('active');
+    }
+  });
+}
+
+function setNoteFade(enabled) {
+  fadeNotes = enabled;
+  // Select buttons within the Note Fade option group
+  document.querySelectorAll('.option-label').forEach(label => {
+    if (label.textContent === 'Note Fade') {
+      const buttons = label.parentElement.querySelectorAll('.option-button');
+      buttons.forEach(btn => {
+        btn.classList.remove('active');
+        if ((enabled && btn.textContent === 'Enabled') || (!enabled && btn.textContent === 'Disabled')) {
+          btn.classList.add('active');
+        }
+      });
+    }
+  });
+}
+
+function setHitSounds(enabled) {
+  hitSoundsEnabled = enabled;
+  // Select buttons within the Hit Sounds option group 
+  document.querySelectorAll('.option-label').forEach(label => {
+    if (label.textContent === 'Hit Sounds') {
+      const buttons = label.parentElement.querySelectorAll('.option-button');
+      buttons.forEach(btn => {
+        btn.classList.remove('active');
+        if ((enabled && btn.textContent === 'Enabled') || (!enabled && btn.textContent === 'Disabled')) {
+          btn.classList.add('active');
+        }
+      });
+    }
+  });
+}
+
+// Add function to play hit sound
+function playHitSound() {
+  if (!hitSoundsEnabled || !hitSoundBuffer || !audioContext) return;
+  
+  const hitSound = audioContext.createBufferSource();
+  hitSound.buffer = hitSoundBuffer;
+  hitSound.connect(audioContext.destination);
+  hitSound.start();
+}
+
+function createArrow(lane, time, duration) {
+  const arrow = document.createElement('div');
+  arrow.className = `falling-arrow lane-${lane}`;
+  arrow.style.left = `${lane * laneWidth + (laneWidth - 60) / 2}px`;
+  gameContainer.appendChild(arrow);
+  
+  const arrowData = {
+    element: arrow,
+    lane: lane,
+    time: time,
+    duration: duration,
+    active: true
+  };
+  
+  activeArrows.push(arrowData);
+  
+  const startY = scrollDirection === 'up' ? gameContainer.clientHeight + 60 : -60;
+  const targetY = scrollDirection === 'up' ? -60 : gameContainer.clientHeight - 110;
+  
+  gsap.fromTo(arrow, {
+    y: startY
+  }, {
+    y: targetY,
+    duration: scrollTime / 1000,
+    ease: "none",
+    onComplete: () => {
+      arrow.remove();
+      activeArrows = activeArrows.filter(a => a !== arrowData);
+    }
+  });
+}
+
+function showFeedback(text, className) {
+  feedbackElement.textContent = '';
+  feedbackElement.className = `feedback ${className}`;
+  feedbackElement.style.opacity = 1;
+  setTimeout(() => {
+    feedbackElement.style.opacity = 0;
+  }, 500);
+}
+
+function updateScore(points) {
+  score += points;
+  scoreElement.textContent = `Score: ${score}`;
+}
+
+function updateCombo() {
+  comboElement.textContent = `Combo: ${combo}`;
+}
+
+function addHitEffect(lane) {
+  const hitEffect = document.createElement('div');
+  hitEffect.className = 'hit-effect';
+  hitEffect.style.position = 'absolute';
+  hitEffect.style.left = `${lane * laneWidth + (laneWidth - 60) / 2}px`;
+  hitEffect.style.bottom = '100px';
+  hitEffect.style.width = '80px';
+  hitEffect.style.height = '80px';
+  hitEffect.style.background = 'rgba(255, 255, 255, 0.7)';
+  hitEffect.style.borderRadius = '50%';
+  hitEffect.style.pointerEvents = 'none';
+  gameContainer.appendChild(hitEffect);
+  
+  gsap.to(hitEffect, {
+    scale: 1.5,
+    opacity: 0,
+    duration: 0.5,
+    onComplete: () => {
+      hitEffect.remove();
+    }
+  });
+}
+
+async function startGame() {
+  if (gameStarted) return;
+  
+  currentUser = await getCurrentUser();
+  
+  gameStarted = true;
+  startPrompt.style.display = 'none';
+  songData = defaultChart;
+  startTime = Date.now();
+  score = 0;
+  combo = 0;
+  updateScore(0);
+  updateCombo();
+  
+  activeArrows.forEach(arrow => {
+    arrow.element.remove();
+    gsap.killTweensOf(arrow.element);
+  });
+  activeArrows = [];
+
+  if (songSource) {
+    songSource.stop();
+  }
+
+  if (songBuffer && audioContext) {
+    songSource = audioContext.createBufferSource();
+    songSource.buffer = songBuffer;
+    songSource.connect(audioContext.destination);
+    songSource.start();
+  }
+  
+  scheduledNotes = [];
+  const notes = songData.song.notes;
+  notes.forEach(section => {
+    section.sectionNotes.forEach(note => {
+      if (note[1] < 4) {
+        scheduledNotes.push({
+          time: note[0],
+          lane: note[1],
+          duration: note[2]
+        });
+      }
+    });
+  });
+  
+  requestAnimationFrame(updateGame);
+}
+
+function updateGame() {
+  if (!songData) return;
+  
+  const currentTime = Date.now() - startTime;
+  
+  while (scheduledNotes.length > 0 && scheduledNotes[0].time <= currentTime + scrollTime) {
+    const note = scheduledNotes.shift();
+    createArrow(note.lane, note.time, note.duration);
+  }
+  
+  if (songSource && songSource.buffer) {
+    const songDuration = songSource.buffer.duration * 1000;
+    if (currentTime < songDuration) {
+      requestAnimationFrame(updateGame);
+    } else {
+      gameStarted = false;
+      showLeaderboard();
+    }
+  } else {
+    requestAnimationFrame(updateGame);
+  }
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    if (audioContext && audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
+    return;
+  }
+  
+  const keyIndex = keys.map(k => k.toLowerCase()).indexOf(e.key.toLowerCase());
+  if (keyIndex === -1) return;
+  
+  const arrowsInLane = activeArrows.filter(a => a.lane === keyIndex && a.active);
+  if (arrowsInLane.length === 0) return;
+  
+  const targetArrow = arrowsInLane.reduce((closest, current) => {
+    const currentY = scrollDirection === 'up' ? 50 : gameContainer.clientHeight - 110;
+    const arrowRect = current.element.getBoundingClientRect();
+    const currentDistance = Math.abs(arrowRect.top - currentY);
+    
+    if (!closest) return current;
+    
+    const closestRect = closest.element.getBoundingClientRect();
+    const closestDistance = Math.abs(closestRect.top - currentY);
+    
+    return currentDistance < closestDistance ? current : closest;
+  }, null);
+  
+  if (!targetArrow) return;
+  
+  const arrowRect = targetArrow.element.getBoundingClientRect();
+  const targetY = scrollDirection === 'up' ? 50 : gameContainer.clientHeight - 110;
+  const distance = Math.abs(arrowRect.top - targetY);
+  
+  // Only deactivate and fade if setting is enabled
+  targetArrow.active = false;
+  if (fadeNotes) {
+    targetArrow.element.style.opacity = 0;
+  }
+  
+  const simultaneousNotes = findSimultaneousNotes(targetArrow);
+  const multiplier = simultaneousNotes.length > 1 ? simultaneousNotes.length : 1;
+  
+  // Play hit sound if enabled
+  playHitSound();
+  
+  if (distance < 30) {
+    showFeedback('', 'perfect');
+    updateScore(350 * multiplier);
+    combo++;
+  } 
+  else if (distance < 60) {
+    showFeedback('', 'good');
+    updateScore(200 * multiplier);
+    combo++;
+  }
+  else {
+    showFeedback('', 'miss');
+    combo = 0;
+  }
+  
+  updateCombo();
+  addHitEffect(keyIndex);
+  
+  const playerGif = document.getElementById('player');
+  if(keyIndex === 0) {
+    playerGif.src = 'https://file.garden/Zx3u9a1Z7kthgAAO/bfleft.gif';
+  } else if(keyIndex === 1) {
+    playerGif.src = 'https://file.garden/Zx3u9a1Z7kthgAAO/bfdown.gif';
+  } else if(keyIndex === 2) {
+    playerGif.src = 'https://file.garden/Zx3u9a1Z7kthgAAO/bfup.gif';
+  } else if(keyIndex === 3) {
+    playerGif.src = 'https://file.garden/Zx3u9a1Z7kthgAAO/bfright.gif';
+  }
+});
+
+function showLeaderboard() {
+  const leaderboardContainer = document.getElementById('leaderboard-container');
+  const leaderboardScores = document.querySelector('.leaderboard-scores');
+  
+  // Update high score for current player
+  if (currentUser) {
+    const existingScore = highScores.get(currentUser.username);
+    if (!existingScore || score > existingScore.score) {
+      highScores.set(currentUser.username, {
+        score: score,
+        username: currentUser.username,
+        profilePic: currentUser.profilePic,
+        timestamp: Date.now()
+      });
+    }
+  }
+  
+  // Convert Map to array and sort by score
+  const sortedScores = Array.from(highScores.values())
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10);
+  
+  leaderboardScores.innerHTML = '';
+  
+  sortedScores.forEach((scoreData, index) => {
+    const entry = document.createElement('div');
+    entry.className = 'score-entry';
+    
+    entry.innerHTML = `
+      <img src="${scoreData.profilePic}" alt="${scoreData.username}'s Profile Picture">
+      <div class="user-info">
+        <span class="username">@${scoreData.username}</span>
+        <span class="score">#${index + 1}: ${scoreData.score}</span>
+      </div>
+    `;
+    
+    leaderboardScores.appendChild(entry);
+  });
+  
+  leaderboardContainer.style.display = 'flex';
+}
+
+document.getElementById('leaderboard-container').addEventListener('click', () => {
+  document.getElementById('leaderboard-container').style.display = 'none';
+  startPrompt.style.display = 'block';
+});
+</script>
+</body></html>
